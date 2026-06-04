@@ -1,0 +1,111 @@
+# name: Deploy backend
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   push_to_docker:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Login to Dockerhub
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ secrets.DOCKER_USERNAME }}
+#           password: ${{ secrets.DOCKER_PASSWORD }}
+
+#       - name: Build Docker Image
+#         run : |
+#           docker build -t ${{ secrets.DOCKER_USERNAME }}/job-tracker-backend:latest .
+
+#       - name: Push to Dockerhub
+#         run : |
+#           docker push ${{ secrets.DOCKER_USERNAME }}/job-tracker-backend:latest
+# Multi job deployment
+#   deploy_to_ec2:
+#     runs-on: ubuntu-latest
+#     needs: push_to_docker
+#     steps:
+
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Copy docker-compose config via SCP
+#         uses: appleboy/scp-action@v0.1.7
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ubuntu
+#           key: ${{ secrets.EC2_SSH_KEY }}
+#           source: "docker-compose.prod.yml"
+#           target: "/home/ubuntu/job-tracker-backend/"
+#           strip_components: 0
+
+#       - name: SSH into EC2
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{secrets.EC2_HOST}}
+#           username: ubuntu
+#           key:  ${{secrets.EC2_SSH_KEY}}
+#           script: |
+#             cd job-tracker-backend
+#             docker compose pull
+#             docker compose -f docker-compose.prod.yml up -d --build
+
+# Single job deployment
+
+name: Deploy backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Dockerhub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run : |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/job-tracker-backend:latest .
+
+      - name: Push to Dockerhub
+        run : |
+          docker push ${{ secrets.DOCKER_USERNAME }}/job-tracker-backend:latest
+
+      - name: Copy docker-compose config via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/home/ubuntu/job-tracker-backend/"
+          strip_components: 0
+
+      - name: SSH into EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ubuntu
+          key:  ${{secrets.EC2_SSH_KEY}}
+          script: |
+            cd /home/ubuntu/job-tracker-backend
+            docker compose pull
+            docker compose -f docker-compose.prod.yml up -d
+            docker image prune -f
+#           Clear old, dangling images to protect your EC2 disk space from filling up
