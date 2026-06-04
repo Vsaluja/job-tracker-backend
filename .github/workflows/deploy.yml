@@ -105,7 +105,7 @@ jobs:
           key:  ${{secrets.EC2_SSH_KEY}}
           script: |
             cd /home/ubuntu/job-tracker-backend
-            docker compose pull
+            docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
             docker image prune -f
 #           Clear old, dangling images to protect your EC2 disk space from filling up
