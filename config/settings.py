@@ -56,9 +56,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    "http://vansh-react-demo-12345.s3-website-us-east-1.amazonaws.com/"
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://localhost:3000", # Just in case you use alternative local preview ports
 ]
 
 ROOT_URLCONF = 'config.urls'
