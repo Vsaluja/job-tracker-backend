@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   django:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
+    image: vsaluja/job-tracker-backend:latest
     container_name: django_container
     restart: always
     # Only allow requests from inside EC2
