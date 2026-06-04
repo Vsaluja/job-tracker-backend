@@ -58,6 +58,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "https://d1grh0ahv36n3r.cloudfront.net",
     "http://localhost:5173",
+
     "http://127.0.0.1:5173",
 ]
 
